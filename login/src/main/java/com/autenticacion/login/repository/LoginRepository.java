@@ -3,12 +3,14 @@ package com.autenticacion.login.repository;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import com.autenticacion.login.model.usuarios;
+import com.autenticacion.login.model.Usuarios;
 
-public interface LoginRepository extends JpaRepository<usuarios, Long>{
+@Repository
+public interface LoginRepository extends JpaRepository<Usuarios, Long>{
     
     // Buscaremos por rut identificador unico
-    Optional<usuarios> findByRut(String rut); 
+    Optional<Usuarios> findByRut(String rut); 
 
 }

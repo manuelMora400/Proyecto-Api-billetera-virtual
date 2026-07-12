@@ -3,7 +3,7 @@ package com.autenticacion.login.model;
 import java.util.Collection;
 import java.util.List;
 
-import javax.management.relation.Role;
+
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "usuarios")
 @AllArgsConstructor
 @NoArgsConstructor
-public class usuarios implements UserDetails{
+public class Usuarios implements UserDetails{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Id autoincrementable
@@ -81,5 +81,8 @@ public class usuarios implements UserDetails{
     public boolean isEnabled(){
         return true;
     }
+
+
+    
 
 }
