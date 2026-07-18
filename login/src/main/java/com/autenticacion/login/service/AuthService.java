@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.autenticacion.login.exception.CredencialesIncorrectas;
 import com.autenticacion.login.exception.NoExisteID;
 import com.autenticacion.login.exception.RutNoExistente;
 import com.autenticacion.login.exception.RutYaExiste;
@@ -62,22 +63,52 @@ public class AuthService {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(rut, password));
 
         Optional<Usuarios> usuario = repository.findByRut(rut); // ¿Rut existe en la base de datos?
+        Optional<Usuarios> validar = repository.findByPassword(password); //¿la contraseña existe?
+        
         if(usuario.isEmpty()){
             throw new RutNoExistente("El Usuario no se encuentra registrado en el sistema");
+        } 
+        if(validar.isEmpty()){
+            throw new CredencialesIncorrectas("Contraseña incorrecta");
+        }
+        return jwtService.generateToken(usuario.get()); // generara token para el usuario
+
+    }
+
+    public Usuarios actualizar (Usuarios usuarios, String passwordNueva, String password){
+
+        if(usuarios.getRut() == null){
+            throw new IllegalArgumentException("El rut no puede ser nulo");
         }
 
-        return jwtService.generateToken(usuario.get());
+        Optional<Usuarios> existeRut = repository.findByRut(usuarios.getRut());
 
+        if(existeRut.isEmpty()){
+            throw new RutNoExistente("El rut que desea actualizar no existe");
+        } else if(existeRut.isPresent()){
+            throw new RutYaExiste("El rut que desea actualizar ya existe");
+        }
+
+       Usuarios usuarioActualizar = new Usuarios();
+       if(passwordEncoder.matches(password, usuarios.getPassword())){
+            //Validamos las credenciales con la encriptada//
+            throw new CredencialesIncorrectas("Contraseña incorrecta para actualizar");
+        }
+        passwordEncoder.encode(passwordNueva); // Encriptamos la nueva contraseña
+        usuarioActualizar.setRut(usuarios.getRut());
+        usuarioActualizar.setPassword(passwordNueva);
+        usuarioActualizar.setRole(usuarioActualizar.getRole());
+        return usuarioActualizar;
     }
 
     public void eliminarCuenta(Long id){
        if(id == null){
             throw new IllegalArgumentException("El id no puede ser nulo");
-       }
+        }
        if(repository.existsById(id)){
             repository.deleteById(id);
-       } else{
+        } else{
             throw new NoExisteID("El Id cuenta que desea eliminar no existe: " + id);
-       }
+        }
     }
 }

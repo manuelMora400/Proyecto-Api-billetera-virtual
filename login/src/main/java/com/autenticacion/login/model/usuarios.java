@@ -9,6 +9,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -34,10 +36,11 @@ public class Usuarios implements UserDetails{
     private Long id;
 
     @NotBlank(message = "El Rut del usuario es obligatorio")
-    @Column(nullable = false , length = 12)
+    @Column(nullable = false , length = 12, unique = true)
     private String rut;
 
     @NotBlank( message = "La contraseña es obligatoria para inicio de sesion")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) //Evita que devuelva la contraseña en json
     private String password;
 
     @Enumerated(EnumType.STRING) // permitimos que la base de datos la guarde con su nombre
