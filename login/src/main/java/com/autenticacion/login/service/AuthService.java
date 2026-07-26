@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.autenticacion.login.dto.LoginDTO;
 import com.autenticacion.login.exception.CredencialesIncorrectas;
 import com.autenticacion.login.exception.NoExisteID;
 import com.autenticacion.login.exception.RutNoExistente;
@@ -52,27 +53,19 @@ public class AuthService {
      
     }
 
-    public String login(String rut, String password){
+    public String login(LoginDTO logindDto){
         
-        if(rut.length() > 13 || rut == null){
+        if(logindDto.getRut() == null || logindDto.getRut().length() > 13){
             throw new IllegalArgumentException("El tamaño del rut no puede ser mas de 12 caracteres y rut nulos no son validos");
-        } else if (password == null){
+        } else if (logindDto.getPassword() == null){
             throw new IllegalArgumentException("La contraseña no puede estar vacia");
         }
-
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(rut, password));
-
-        Optional<Usuarios> usuario = repository.findByRut(rut); // ¿Rut existe en la base de datos?
-        Optional<Usuarios> validar = repository.findByPassword(password); //¿la contraseña existe?
-        
+        Optional<Usuarios> usuario = repository.findByRut(logindDto.getRut()); // ¿Rut existe en la base de datos?
         if(usuario.isEmpty()){
-            throw new RutNoExistente("El Usuario no se encuentra registrado en el sistema");
-        } 
-        if(validar.isEmpty()){
-            throw new CredencialesIncorrectas("Contraseña incorrecta");
+            throw new RutNoExistente("Datos erroneos, verifique Rut o contraseña nuevamente");
         }
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(logindDto.getRut(), logindDto.getPassword()));
         return jwtService.generateToken(usuario.get()); // generara token para el usuario
-
     }
 
     public Usuarios actualizar (Usuarios usuarios, String passwordNueva, String password){
